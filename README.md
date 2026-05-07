@@ -26,13 +26,12 @@ leaves = { path = "path/to/leaves" }
 In your application code:
 
 ```rust
-use leaves::{parse_markdown, MarkdownTheme};
-use syntect::parsing::SyntaxSet;
+use leaves::{parse_markdown, syntax_set_with_bundled_syntaxes, MarkdownTheme};
 use syntect::highlighting::ThemeSet;
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Initialize syntect resources
-    let ss = SyntaxSet::load_defaults_newlines();
+    let ss = syntax_set_with_bundled_syntaxes()?;
     let ts = ThemeSet::load_defaults();
     let syntect_theme = &ts.themes["base16-ocean.dark"];
 
@@ -55,6 +54,8 @@ fn main() {
     for entry in toc {
         println!("Heading '{}' is at level {} and starts on line {}", entry.title, entry.level, entry.line);
     }
+
+    Ok(())
 }
 ```
 

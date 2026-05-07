@@ -3,7 +3,27 @@ use ratatui::{
     style::{Modifier, Style},
     text::{Line, Span},
 };
-use syntect::{easy::HighlightLines, highlighting::Theme, parsing::SyntaxSet};
+use syntect::{
+    easy::HighlightLines,
+    highlighting::Theme,
+    parsing::{ParseSyntaxError, SyntaxDefinition, SyntaxSet},
+};
+
+/// Builds a `SyntaxSet` from syntect's defaults plus syntax definitions bundled
+/// with leaves.
+///
+/// This includes Nushell support for fenced code blocks tagged as `nu` or
+/// `nushell`.
+pub fn syntax_set_with_bundled_syntaxes() -> Result<SyntaxSet, ParseSyntaxError> {
+    let nushell = SyntaxDefinition::load_from_str(
+        include_str!("../syntaxes/nushell.sublime-syntax"),
+        true,
+        Some("nushell"),
+    )?;
+    let mut builder = SyntaxSet::load_defaults_newlines().into_builder();
+    builder.add(nushell);
+    Ok(builder.build())
+}
 
 /// Applies search-highlight styling (background color) to every span in a line.
 ///
@@ -27,10 +47,7 @@ pub fn highlight_line<'a>(line: &Line<'a>, theme: &MarkdownTheme) -> Line<'a> {
 ///
 /// Handles common aliases (e.g. `ts` → TypeScript, `py` → Python, `sh` → Bash)
 /// and falls back to plain text when no match is found.
-pub fn resolve_syntax<'a>(
-    lang: &str,
-    ss: &'a SyntaxSet,
-) -> &'a syntect::parsing::SyntaxReference {
+pub fn resolve_syntax<'a>(lang: &str, ss: &'a SyntaxSet) -> &'a syntect::parsing::SyntaxReference {
     let raw = lang.trim();
     let normalized = raw
         .split(|c: char| c.is_whitespace() || c == ',' || c == '{')
@@ -60,6 +77,7 @@ pub fn resolve_syntax<'a>(
         "java" => &["Java", "java"],
         "kt" | "kotlin" => &["Kotlin", "kt", "kotlin"],
         "ps1" | "powershell" | "pwsh" => &["PowerShell", "ps1", "powershell"],
+        "nu" | "nushell" => &["nushell", "Nushell", "Nu", "nu"],
         "docker" | "dockerfile" => &["Dockerfile", "dockerfile"],
         "yml" | "yaml" => &["YAML", "yml", "yaml"],
         "rs" | "rust" => &["Rust", "rs", "rust"],
@@ -160,4 +178,17 @@ pub(crate) fn highlight_code(
         });
     }
     (out, inner_width, digit_width)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{resolve_syntax, syntax_set_with_bundled_syntaxes};
+
+    #[test]
+    fn bundled_syntax_set_resolves_nushell_aliases() {
+        let ss = syntax_set_with_bundled_syntaxes().expect("bundled syntax should load");
+
+        assert_eq!(resolve_syntax("nu", &ss).name, "nushell");
+        assert_eq!(resolve_syntax("nushell", &ss).name, "nushell");
+    }
 }
