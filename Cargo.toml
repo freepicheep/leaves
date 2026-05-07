@@ -1,0 +1,18 @@
+[package]
+name = "leaves"
+version = "0.1.0"
+edition = "2021"
+description = "Markdown-to-Ratatui rendering library — rich terminal markdown previews with syntax highlighting, tables, LaTeX, and Mermaid diagrams"
+license = "MIT"
+
+[lib]
+name = "leaves"
+path = "src/lib.rs"
+
+[dependencies]
+ratatui       = "0.29"
+pulldown-cmark = "0.12"
+syntect       = "5.2"
+unicode-width = "0.1"
+unicodeit     = "0.2"
+mmdflux       = "2.2"
