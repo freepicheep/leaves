@@ -6,7 +6,7 @@ It provides a robust rendering pipeline that converts Markdown text directly int
 ## Features
 
 - **Rich Markdown Elements**: Renders standard Markdown features like bold, italics, strikethrough, lists, and blockquotes.
-- **Syntax Highlighting**: Uses `syntect` to parse code blocks and inline code with proper highlighting.
+- **Syntax Highlighting**: Uses `syntect` to parse code blocks and inline code with proper highlighting. Includes bat's `ansi` theme for terminal-palette code highlighting.
 - **Tables**: Parses and visually structures Markdown tables.
 - **Special Integrations**:
   - **LaTeX**: Converts simple LaTeX mathematical expressions into Unicode (via `unicodeit`).
@@ -26,13 +26,14 @@ leaves = { path = "path/to/leaves" }
 In your application code:
 
 ```rust
-use leaves::{parse_markdown, syntax_set_with_bundled_syntaxes, MarkdownTheme};
-use syntect::highlighting::ThemeSet;
+use leaves::{
+    parse_markdown, syntax_set_with_bundled_syntaxes, theme_set_with_bundled_themes, MarkdownTheme,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 1. Initialize syntect resources
     let ss = syntax_set_with_bundled_syntaxes()?;
-    let ts = ThemeSet::load_defaults();
+    let ts = theme_set_with_bundled_themes()?;
     let syntect_theme = &ts.themes["base16-ocean.dark"];
 
     // 2. Choose a markdown theme (e.g., Ocean Dark)
@@ -59,10 +60,27 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+For terminal-palette code highlighting, use the bundled bat ANSI theme together
+with Leaves' terminal markdown theme:
+
+```rust
+use leaves::{
+    parse_markdown, syntax_set_with_bundled_syntaxes, theme::TERMINAL,
+    theme_set_with_bundled_themes,
+};
+
+let ss = syntax_set_with_bundled_syntaxes()?;
+let ts = theme_set_with_bundled_themes()?;
+let syntect_theme = &ts.themes["ansi"];
+
+let (lines, toc) = parse_markdown(markdown_text, &ss, syntect_theme, &TERMINAL);
+```
+
 ## Structure
 
 - `src/theme.rs`: Contains the `MarkdownTheme` and preset themes.
 - `src/parse.rs`: Core engine powering `parse_markdown()`.
 - `src/toc.rs`: Data structure for handling headings.
 - `src/highlight.rs`: Syntax highlighting helpers.
+- `themes/ansi.tmTheme`: Bundled bat ANSI theme for terminal-palette code highlighting.
 - `src/width.rs`: Display width utilities.
