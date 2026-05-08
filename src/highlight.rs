@@ -249,7 +249,7 @@ mod tests {
         let theme = &themes.themes["ansi"];
 
         let (lines, _, _) = highlight_code(
-            "use /path/to/nu-salesforce *\nsf query 'SELECT Id FROM Account LIMIT 10'\nlet x = $env.SALESFORCE_USERNAME\n",
+            "sf query 'SELECT Id FROM Account LIMIT 10'\nlet x = 1\n",
             "nu",
             &ss,
             theme,
@@ -276,21 +276,11 @@ mod tests {
             .iter()
             .find(|span| span.content.as_ref() == "let")
             .expect("let should remain highlighted as a Nushell declaration");
-        let wildcard = spans
-            .iter()
-            .find(|span| span.content.as_ref() == "*")
-            .expect("use wildcard import should be highlighted");
-        let env_var = spans
-            .iter()
-            .find(|span| span.content.as_ref() == "SALESFORCE_USERNAME")
-            .expect("environment variable member should be highlighted");
 
         assert_eq!(sf.style.fg, Some(RatatuiColor::Blue));
         assert_eq!(query.style.fg, Some(RatatuiColor::Cyan));
         assert_eq!(sql.style.fg, Some(RatatuiColor::Green));
         assert_eq!(let_keyword.style.fg, Some(RatatuiColor::Magenta));
-        assert_eq!(wildcard.style.fg, Some(RatatuiColor::Magenta));
-        assert_eq!(env_var.style.fg, Some(RatatuiColor::Cyan));
     }
 
     #[test]

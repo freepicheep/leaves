@@ -298,7 +298,6 @@ contexts:
 
   variables:
     - match: '(\$env)(\.)([A-Za-z_][A-Za-z0-9_]*)'
-      scope: variable.parameter.environment.nu
       captures:
         1: variable.language.nu
         2: punctuation.accessor.dot.nu
@@ -379,13 +378,11 @@ contexts:
 
   flags:
     - match: '(--)([0-9[:alpha:]_?@!-][[:alnum:]_?@!-]*)(=)?'
-      scope: variable.parameter.flag.nu
       captures:
         1: punctuation.definition.parameter.nu
         2: variable.parameter.flag.nu
         3: keyword.operator.assignment.nu
     - match: '(-)([[:alnum:][:punct:]])(=)?'
-      scope: variable.parameter.flag.nu
       captures:
         1: punctuation.definition.parameter.nu
         2: variable.parameter.flag.nu
