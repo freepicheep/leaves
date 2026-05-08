@@ -1,6 +1,6 @@
 [package]
 name = "leaves"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "Markdown-to-Ratatui rendering library — rich terminal markdown previews with syntax highlighting, tables, LaTeX, and Mermaid diagrams"
 license = "MIT"
