@@ -96,3 +96,7 @@ Each of these wonderful crates:
 - `unicode-width`
 - `unicodeit`
 - `mmdflux`
+
+And...
+- `bat` for providing the custom `syntect` themes.
+- [nushell_sublime_syntax ](https://github.com/kurokirasama/nushell_sublime_syntax) for Nu syntax highlighting
