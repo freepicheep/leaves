@@ -84,3 +84,15 @@ let (lines, toc) = parse_markdown(markdown_text, &ss, syntect_theme, &TERMINAL);
 - `src/highlight.rs`: Syntax highlighting helpers.
 - `themes/ansi.tmTheme`: Bundled bat ANSI theme for terminal-palette code highlighting.
 - `src/width.rs`: Display width utilities.
+
+## Credit
+
+To the [leaf](https://github.com/RivoLink/leaf) project for making this possible. `leaves` is really just an abstraction fo the work they did there so other tools can enjoy nice Markdown rendering in the terminal.
+
+Each of these wonderful crates:
+- `ratatui`
+- `pulldown-cmark`
+- `syntect`
+- `unicode-width`
+- `unicodeit`
+- `mmdflux`
