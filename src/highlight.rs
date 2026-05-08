@@ -221,7 +221,7 @@ pub(crate) fn highlight_code(
 #[cfg(test)]
 mod tests {
     use super::{
-        resolve_syntax, syntax_set_with_bundled_syntaxes, syntect_to_color,
+        highlight_code, resolve_syntax, syntax_set_with_bundled_syntaxes, syntect_to_color,
         theme_set_with_bundled_themes,
     };
     use ratatui::style::Color as RatatuiColor;
@@ -240,6 +240,57 @@ mod tests {
         let themes = theme_set_with_bundled_themes().expect("bundled themes should load");
 
         assert!(themes.themes.contains_key("ansi"));
+    }
+
+    #[test]
+    fn nushell_highlighting_distinguishes_custom_commands_from_arguments() {
+        let ss = syntax_set_with_bundled_syntaxes().expect("bundled syntax should load");
+        let themes = theme_set_with_bundled_themes().expect("bundled themes should load");
+        let theme = &themes.themes["ansi"];
+
+        let (lines, _, _) = highlight_code(
+            "use /path/to/nu-salesforce *\nsf query 'SELECT Id FROM Account LIMIT 10'\nlet x = $env.SALESFORCE_USERNAME\n",
+            "nu",
+            &ss,
+            theme,
+            80,
+        );
+        let spans = lines
+            .iter()
+            .flat_map(|line| line.content_spans.iter())
+            .collect::<Vec<_>>();
+
+        let sf = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "sf")
+            .expect("custom command should be highlighted");
+        let query = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "query")
+            .expect("custom subcommand should be highlighted");
+        let sql = spans
+            .iter()
+            .find(|span| span.content.contains("SELECT Id"))
+            .expect("quoted SQL should be highlighted as a string");
+        let let_keyword = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "let")
+            .expect("let should remain highlighted as a Nushell declaration");
+        let wildcard = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "*")
+            .expect("use wildcard import should be highlighted");
+        let env_var = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "SALESFORCE_USERNAME")
+            .expect("environment variable member should be highlighted");
+
+        assert_eq!(sf.style.fg, Some(RatatuiColor::Blue));
+        assert_eq!(query.style.fg, Some(RatatuiColor::Cyan));
+        assert_eq!(sql.style.fg, Some(RatatuiColor::Green));
+        assert_eq!(let_keyword.style.fg, Some(RatatuiColor::Magenta));
+        assert_eq!(wildcard.style.fg, Some(RatatuiColor::Magenta));
+        assert_eq!(env_var.style.fg, Some(RatatuiColor::Cyan));
     }
 
     #[test]

@@ -39,8 +39,10 @@
                 <string>comment, punctuation.definition.comment</string>
                 <key>settings</key>
                 <dict>
+                    <key>fontStyle</key>
+                    <string>italic</string>
                     <key>foreground</key>
-                    <string>#02000000</string>
+                    <string>#08000000</string>
                 </dict>
             </dict>
             <dict>
@@ -54,6 +56,19 @@
                     <string>#05000000</string>
                 </dict>
             </dict>
+            <!-- <dict> -->
+                <!-- <key>name</key> -->
+                <!-- <string>Nushell comments</string> -->
+                <!-- <key>scope</key> -->
+                <!-- <string>comment.line.number-sign.nu</string> -->
+                <!-- <key>settings</key> -->
+                <!-- <dict> -->
+                    <!-- <key>fontStyle</key> -->
+                    <!-- <string>italic</string> -->
+                    <!-- <key>foreground</key> -->
+                    <!-- <string>#08000000</string> -->
+                <!-- </dict> -->
+            <!-- </dict> -->
             <dict>
                 <key>name</key>
                 <string>Functions</string>
