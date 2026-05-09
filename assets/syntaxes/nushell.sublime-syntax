@@ -411,10 +411,34 @@ contexts:
       scope: punctuation.section.braces.nu
     - match: '[\[\]]'
       scope: punctuation.section.brackets.nu
-    - match: '[()]'
-      scope: punctuation.section.parens.nu
+    - match: '\('
+      scope: punctuation.section.parens.begin.nu
+      push: parenthesized-expression-head
+    - match: '\)'
+      scope: punctuation.section.parens.end.nu
     - match: '[,;:]'
       scope: punctuation.separator.nu
+
+  parenthesized-expression-head:
+    - match: '\)'
+      scope: punctuation.section.parens.end.nu
+      pop: 1
+    - include: comments
+    - match: '\s+'
+    - match: '(\^)?(?!(?:{{builtins}}|{{control_keywords}}|{{declaration_keywords}})(?![\w-]))({{command_part}})(?:\s+({{command_part}}))?'
+      captures:
+        1: keyword.operator.external.nu
+        2: entity.name.function.nu
+        3: support.function.nu
+      set: parenthesized-expression-body
+    - match: '(?=\S)'
+      set: parenthesized-expression-body
+
+  parenthesized-expression-body:
+    - match: '\)'
+      scope: punctuation.section.parens.end.nu
+      pop: 1
+    - include: expressions
 
   closure-parameters:
     - meta_scope: meta.function.parameters.closure.nu

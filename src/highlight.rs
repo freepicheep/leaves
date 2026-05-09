@@ -284,6 +284,43 @@ mod tests {
     }
 
     #[test]
+    fn nushell_highlighting_recognizes_parenthesized_custom_commands() {
+        let ss = syntax_set_with_bundled_syntaxes().expect("bundled syntax should load");
+        let themes = theme_set_with_bundled_themes().expect("bundled themes should load");
+        let theme = &themes.themes["ansi"];
+
+        let (lines, _, _) = highlight_code(
+            "$env.config.menus ++= [( repl-command-info menu )]\n\
+             $env.config.keybindings ++= [( repl-command-info keybind {keycode: char_d})]\n",
+            "nu",
+            &ss,
+            theme,
+            120,
+        );
+        let spans = lines
+            .iter()
+            .flat_map(|line| line.content_spans.iter())
+            .collect::<Vec<_>>();
+
+        let command = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "repl-command-info")
+            .expect("parenthesized custom command should be highlighted");
+        let menu = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "menu")
+            .expect("parenthesized subcommand should be highlighted");
+        let keybind = spans
+            .iter()
+            .find(|span| span.content.as_ref() == "keybind")
+            .expect("second parenthesized subcommand should be highlighted");
+
+        assert_eq!(command.style.fg, Some(RatatuiColor::Blue));
+        assert_eq!(menu.style.fg, Some(RatatuiColor::Cyan));
+        assert_eq!(keybind.style.fg, Some(RatatuiColor::Cyan));
+    }
+
+    #[test]
     fn bat_ansi_palette_colors_are_mapped_to_terminal_colors() {
         assert_eq!(
             syntect_to_color(SyntectColor {
