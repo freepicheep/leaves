@@ -33,7 +33,6 @@ struct ItemState {
     continuation_indent: usize,
 }
 
-
 #[derive(Clone, Copy, Default)]
 struct InlineStyleState {
     in_strong: bool,
@@ -67,10 +66,7 @@ struct CodeBlockRenderContext<'a> {
     list_stack: &'a [ListKind],
 }
 
-
 const DEFAULT_RENDER_WIDTH: usize = 80;
-
-
 
 fn block_prefix(in_bq: bool, theme: &MarkdownTheme) -> Vec<Span<'static>> {
     if in_bq {
@@ -691,11 +687,7 @@ fn push_link_bracket(
 }
 
 fn update_link_marker_modifier(spans: &mut [Span<'static>], modifier: Modifier) {
-    if let Some(span) = spans
-        .iter_mut()
-        .rev()
-        .find(|s| s.content.as_ref() == "[")
-    {
+    if let Some(span) = spans.iter_mut().rev().find(|s| s.content.as_ref() == "[") {
         span.style = span.style.add_modifier(modifier);
     }
 }
@@ -1017,7 +1009,9 @@ pub fn parse_markdown_with_width(
 
     let normalized = normalize_code_fences(src);
     for ev in Parser::new_ext(&normalized, Options::all()) {
-        if table.is_some() && handle_table_event(&mut table, &ev, &mut lines, render_width, theme_colors) {
+        if table.is_some()
+            && handle_table_event(&mut table, &ev, &mut lines, render_width, theme_colors)
+        {
             continue;
         }
         if handle_inline_style_event(&ev, &mut inline, &mut spans, theme_colors, blockquote_depth) {

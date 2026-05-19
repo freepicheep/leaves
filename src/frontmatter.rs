@@ -100,3 +100,113 @@ fn strip_quotes(s: &str) -> &str {
     }
     s
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn no_frontmatter_returns_source_unchanged() {
+        let src = "# Hello\n\nNot a frontmatter doc.";
+        let (rest, pairs) = extract_frontmatter(src);
+        assert_eq!(rest, src);
+        assert!(pairs.is_none());
+    }
+
+    #[test]
+    fn missing_closing_delimiter_returns_source_unchanged() {
+        let src = "---\ntitle: Hello\n\nNo close marker";
+        let (rest, pairs) = extract_frontmatter(src);
+        assert_eq!(rest, src);
+        assert!(pairs.is_none());
+    }
+
+    #[test]
+    fn empty_frontmatter_block_returns_no_pairs() {
+        let src = "---\n---\nbody";
+        let (rest, pairs) = extract_frontmatter(src);
+        assert_eq!(rest, "body");
+        assert!(pairs.is_none());
+    }
+
+    #[test]
+    fn parses_simple_key_value_pairs() {
+        let src = "---\ntitle: Hello\nauthor: Ada\n---\nbody\n";
+        let (rest, pairs) = extract_frontmatter(src);
+        assert_eq!(rest, "body\n");
+        let pairs = pairs.expect("pairs present");
+        assert_eq!(pairs.len(), 2);
+        assert_eq!(pairs[0], ("title".to_string(), "Hello".to_string()));
+        assert_eq!(pairs[1], ("author".to_string(), "Ada".to_string()));
+    }
+
+    #[test]
+    fn dot_dot_dot_terminates_frontmatter() {
+        let src = "---\ntitle: Hello\n...\nbody";
+        let (rest, pairs) = extract_frontmatter(src);
+        assert_eq!(rest, "body");
+        assert_eq!(pairs.unwrap()[0].1, "Hello");
+    }
+
+    #[test]
+    fn strips_quotes_around_values() {
+        let src = "---\ntitle: \"Quoted\"\nname: 'Single'\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs[0].1, "Quoted");
+        assert_eq!(pairs[1].1, "Single");
+    }
+
+    #[test]
+    fn folded_block_scalar_joins_lines() {
+        let src = "---\nsummary: >-\n  line one\n  line two\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs[0].0, "summary");
+        assert_eq!(pairs[0].1, "line one line two");
+    }
+
+    #[test]
+    fn list_values_join_with_comma() {
+        let src = "---\ntags:\n  - rust\n  - cli\n  - tui\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs[0].0, "tags");
+        assert_eq!(pairs[0].1, "rust, cli, tui");
+    }
+
+    #[test]
+    fn empty_value_with_no_indented_items_produces_empty_string() {
+        let src = "---\nempty:\nnext: value\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs[0], ("empty".to_string(), String::new()));
+        assert_eq!(pairs[1], ("next".to_string(), "value".to_string()));
+    }
+
+    #[test]
+    fn comments_and_blank_lines_are_skipped() {
+        let src = "---\n# a comment\n\ntitle: Hi\n# trailing\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs.len(), 1);
+        assert_eq!(pairs[0].1, "Hi");
+    }
+
+    #[test]
+    fn lines_without_colon_or_empty_key_are_skipped() {
+        let src = "---\nnocolon line\n: empty-key\ngood: value\n---\n";
+        let (_rest, pairs) = extract_frontmatter(src);
+        let pairs = pairs.unwrap();
+        assert_eq!(pairs.len(), 1);
+        assert_eq!(pairs[0], ("good".to_string(), "value".to_string()));
+    }
+
+    #[test]
+    fn is_vertical_threshold_is_five() {
+        let four: Vec<_> = (0..4).map(|i| (format!("k{i}"), "v".to_string())).collect();
+        let five: Vec<_> = (0..5).map(|i| (format!("k{i}"), "v".to_string())).collect();
+        assert!(!is_vertical(&four));
+        assert!(is_vertical(&five));
+    }
+}

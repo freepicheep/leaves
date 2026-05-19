@@ -90,7 +90,7 @@ pub fn truncate_display_width(text: &str, max_width: usize) -> String {
 }
 
 /// Computes the display width of a string in terminal columns, treating tabs
-/// as stops every [`TAB_STOP`] columns.
+/// as stops every 4 columns.
 pub fn display_width(text: &str) -> usize {
     let mut width = 0;
     let mut parts = text.split('\t').peekable();
@@ -103,7 +103,7 @@ pub fn display_width(text: &str) -> usize {
     width
 }
 
-/// Expands tab characters to spaces, aligning to [`TAB_STOP`] boundaries
+/// Expands tab characters to spaces, aligning to 4-column tab stops
 /// relative to the given `start_width`.
 pub(crate) fn expand_tabs(text: &str, start_width: usize) -> String {
     if !text.contains('\t') {

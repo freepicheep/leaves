@@ -9,7 +9,6 @@ use unicode_width::UnicodeWidthChar;
 use crate::latex;
 use crate::width::{display_width, expand_tabs};
 
-
 #[derive(Clone, Copy, Default)]
 struct CellInlineStyle {
     bold: bool,

@@ -179,7 +179,7 @@ fn tokenize_segment(
 }
 
 fn try_match_arrow(s: &str) -> Option<(String, usize)> {
-    for pattern in &["-.->" , "==>", "-->", "---", "-.-", "-..", "->", "--"] {
+    for pattern in &["-.->", "==>", "-->", "---", "-.-", "-..", "->", "--"] {
         if s.starts_with(pattern) {
             return Some((pattern.to_string(), pattern.len()));
         }
